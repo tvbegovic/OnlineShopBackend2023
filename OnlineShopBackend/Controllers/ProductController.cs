@@ -17,7 +17,8 @@ namespace OnlineShopBackend.Controllers
             this.configuration = configuration;
         }
 
-        [HttpGet("")]        
+        [HttpGet("")]
+        [Authorize]
         public List<Product> GetProducts()
         {
             using(var db = new SqlConnection(configuration.GetConnectionString("connString")))
@@ -27,6 +28,7 @@ namespace OnlineShopBackend.Controllers
         }
 
         [HttpGet("{id}")]
+        [Authorize]
         public Product? GetProduct(int id)
         {
             using (var db = new SqlConnection(configuration.GetConnectionString("connString")))
@@ -51,6 +53,7 @@ namespace OnlineShopBackend.Controllers
         }
 
         [HttpPost("")]
+        [Authorize]
         public IActionResult Create(Product product)
         {
             if (string.IsNullOrEmpty(product.Name))
@@ -68,6 +71,36 @@ namespace OnlineShopBackend.Controllers
                         )";
                 product.ID = db.ExecuteScalar<int>(sql,product);
                 return Ok(product);
+            }
+        }
+
+        [HttpPut("")]
+        [Authorize]
+        public IActionResult Update(Product product)
+        {
+            if (string.IsNullOrEmpty(product.Name))
+                return BadRequest("Naziv proizvoda je obavezan");
+            if (product.Price == null)
+            {
+                return BadRequest("Cijena je obavezna");
+            }
+            using (var db = new SqlConnection(configuration.GetConnectionString("connString")))
+            {
+                var sql = @"UPDATE Product SET 
+                Name=@Name,Code=@Code,Price=@Price,IdManufacturer=@IdManufacturer,IdCategory=@IdCategory
+                WHERE id = @id";
+                db.Execute(sql, product);
+                return Ok();
+            }
+        }
+
+        [HttpDelete("{id}")]
+        public void Delete(int id)
+        {
+            using (var db = new SqlConnection(configuration.GetConnectionString("connString")))
+            {
+                var sql = "DELETE FROM Product WHERE id = @id";
+                db.Execute(sql, new { id });
             }
         }
     }

@@ -60,6 +60,7 @@
         public bool? Cancelled { get; set; }
         public DateTime? DateProcessed { get; set; }
         public int? IdEmployee { get; set; }
+        public List<OrderDetail>? Details { get; set; }
     }
     public class OrderDetail
     {
